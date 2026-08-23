@@ -68,22 +68,69 @@ export function KidAvatar({
   index,
   name,
   size = "md",
+  photoUrl,
 }: {
   index: number;
   name: string;
   size?: "sm" | "md" | "lg";
+  photoUrl?: string | null;
 }) {
   const dim = size === "sm" ? "size-9" : size === "lg" ? "size-16" : "size-12";
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full shadow-soft",
-        FILLS[index % FILLS.length],
+        photoUrl ? "bg-mist" : FILLS[index % FILLS.length],
         dim,
       )}
       title={name}
     >
-      <Face i={index} />
+      {photoUrl ? (
+        <img src={photoUrl} alt={name} className="size-full object-cover" />
+      ) : (
+        <Face i={index} />
+      )}
     </span>
   );
+}
+
+/** Square-crop and compress a kid photo so it fits in localStorage. */
+export function readKidPhoto(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Chỉ nhận file ảnh."));
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const size = 192;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Không vẽ được ảnh."));
+          return;
+        }
+        const s = Math.min(img.width, img.height) || 1;
+        const sx = (img.width - s) / 2;
+        const sy = (img.height - s) / 2;
+        ctx.fillStyle = "#fff6e8";
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
+      } catch (err) {
+        URL.revokeObjectURL(url);
+        reject(err);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Không mở được ảnh."));
+    };
+    img.src = url;
+  });
 }
