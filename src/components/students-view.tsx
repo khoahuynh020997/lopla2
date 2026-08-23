@@ -1,6 +1,6 @@
 import { FileSpreadsheet, Plus, Trash2, Upload } from "lucide-react";
 import { useMemo, useState } from "react";
-import { KidAvatar } from "@/lib/avatars";
+import { KidAvatar, readKidPhoto } from "@/lib/avatars";
 import { AVATAR_COUNT, GENDER_LABEL } from "@/lib/catalog";
 import { downloadTemplate, parseStudentFile, type ParsedRow } from "@/lib/excel";
 import {
@@ -39,7 +39,7 @@ export function StudentsView() {
             <Upload className="size-4" />
             Mở Excel
           </Button>
-          <Button onClick={() => setEdit({ name: "", gender: "khac", groupId: groups[0]?.id ?? null, avatar: students.length % AVATAR_COUNT, notes: "", parentName: "", parentPhone: "" })}>
+          <Button onClick={() => setEdit({ name: "", gender: "khac", groupId: groups[0]?.id ?? null, avatar: students.length % AVATAR_COUNT, photoUrl: "", notes: "", parentName: "", parentPhone: "" })}>
             <Plus className="size-4" />
             Thêm bé
           </Button>
@@ -93,7 +93,7 @@ function StudentRow({
   const pts = useAppStore((s) => studentBalance(s, student.id));
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-soft">
-      <KidAvatar index={student.avatar} name={student.name} />
+      <KidAvatar index={student.avatar} name={student.name} photoUrl={student.photoUrl} />
       <button className="min-w-0 flex-1 text-left" onClick={onEdit}>
         <p className="truncate font-bold">{student.name}</p>
         <p className="truncate text-xs text-forest/55">
@@ -129,6 +129,7 @@ function StudentForm({
   const [gender, setGender] = useState<Gender>(value.gender ?? "khac");
   const [groupId, setGroupId] = useState<string | null>(value.groupId ?? null);
   const [avatar, setAvatar] = useState(value.avatar ?? 0);
+  const [photoUrl, setPhotoUrl] = useState(value.photoUrl ?? "");
   const [notes, setNotes] = useState(value.notes ?? "");
   const [parentName, setParentName] = useState(value.parentName ?? "");
   const [parentPhone, setParentPhone] = useState(value.parentPhone ?? "");
@@ -136,7 +137,7 @@ function StudentForm({
 
   function save() {
     if (!name.trim()) return;
-    const payload = { name, gender, groupId, avatar, notes, parentName, parentPhone };
+    const payload = { name, gender, groupId, avatar, photoUrl, notes, parentName, parentPhone };
     if (value.id) updateStudent(value.id, payload);
     else addStudent(payload);
     onClose();
@@ -170,13 +171,55 @@ function StudentForm({
       <label className="mb-1 block text-xs font-bold">Số điện thoại liên hệ</label>
       <input className="mb-3 h-11 w-full rounded-xl bg-mist px-3" type="tel" inputMode="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)} placeholder="090..." />
       <label className="mb-1 block text-xs font-bold">Ảnh đại diện</label>
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {photoUrl ? (
+          <button
+            type="button"
+            onClick={() => setPhotoUrl(photoUrl)}
+            className="rounded-full ring-2 ring-leaf ring-offset-2 ring-offset-white"
+            aria-label="Ảnh đã tải"
+          >
+            <KidAvatar index={avatar} name={name || "ảnh bé"} size="sm" photoUrl={photoUrl} />
+          </button>
+        ) : null}
         {Array.from({ length: AVATAR_COUNT }, (_, i) => (
-          <button key={i} type="button" onClick={() => setAvatar(i)} className={avatar === i ? "ring-2 ring-leaf rounded-full" : ""}>
+          <button
+            key={i}
+            type="button"
+            onClick={() => {
+              setAvatar(i);
+              setPhotoUrl("");
+            }}
+            className={!photoUrl && avatar === i ? "rounded-full ring-2 ring-leaf ring-offset-2 ring-offset-white" : ""}
+          >
             <KidAvatar index={i} name={`avatar ${i}`} size="sm" />
           </button>
         ))}
+        <label
+          className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-leaf bg-mist text-leaf hover:bg-gold/30"
+          title="Tải ảnh của bé từ điện thoại hoặc máy tính"
+        >
+          <Plus className="size-5" />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+              void readKidPhoto(file)
+                .then(setPhotoUrl)
+                .catch((err: unknown) => {
+                  window.alert(err instanceof Error ? err.message : "Không tải được ảnh.");
+                });
+            }}
+          />
+        </label>
       </div>
+      {photoUrl ? (
+        <p className="mb-3 text-xs text-forest/55">Ảnh đã tải sẽ dùng làm ảnh đại diện. Bấm một mặt cười để quay lại icon.</p>
+      ) : null}
       <label className="mb-1 block text-xs font-bold">Ghi chú</label>
       <input className="mb-4 h-11 w-full rounded-xl bg-mist px-3" value={notes} onChange={(e) => setNotes(e.target.value)} />
       <div className="flex justify-end gap-2">
@@ -234,6 +277,7 @@ function ImportModal({
       gender: r.gender,
       groupId: r.groupName ? g2.get(r.groupName.trim().toLowerCase()) ?? null : null,
       avatar: i % AVATAR_COUNT,
+      photoUrl: "",
       notes: r.notes,
       parentName: r.parentName,
       parentPhone: r.parentPhone,
