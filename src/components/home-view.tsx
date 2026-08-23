@@ -6,7 +6,7 @@ import {
   useAppStore,
   useClassStudents,
 } from "@/lib/store";
-import { cn, todayLabel } from "@/lib/utils";
+import { cn, morningWish, todayLabel } from "@/lib/utils";
 import { NamePickerButton } from "./name-picker";
 import { Button } from "./ui/button";
 import { Modal } from "./ui/modal";
@@ -92,10 +92,10 @@ export function HomeView() {
                   )}
                 >
                   <span className="w-6 text-center font-display text-lg tabular-nums text-leaf-deep">{i + 1}</span>
-                  <KidAvatar index={row.st.avatar} name={row.st.name} size="sm" />
+                  <KidAvatar index={row.st.avatar} name={row.st.name} size="sm" photoUrl={row.st.photoUrl} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-bold">{row.st.name}</p>
-                    <p className="text-xs text-forest/55">Lớp Lá 2</p>
+                    <p className="text-xs text-forest/55">{room?.name}</p>
                   </div>
                   <span className="font-display text-lg tabular-nums text-leaf">{row.pts} điểm</span>
                 </li>
@@ -127,18 +127,21 @@ export function HomeView() {
 }
 
 function Banner() {
+  const room = useActiveClass();
+  const teachers = room?.teachers ?? "";
+  const className = room?.name ?? "Lớp";
   return (
     <div className="relative overflow-hidden rounded-2xl bg-leaf px-5 py-6 text-cream shadow-soft md:px-8">
       <div className="pointer-events-none absolute -right-6 -top-8 size-40 rounded-full bg-gold/30" />
       <div className="pointer-events-none absolute -bottom-10 left-1/3 size-32 rounded-full bg-white/10" />
       <div className="relative flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-display text-sm tracking-wide text-gold">HÀNH TRÌNH CHINH PHỤC VINH QUANG</p>
+          <p className="font-display text-sm tracking-wide text-gold">CHÀO NGÀY MỚI NĂNG ĐỘNG</p>
           <h1 className="mt-1 max-w-xl font-display text-3xl leading-tight md:text-4xl">
-            Ai sẽ là người tỏa sáng chạm tới vòng nguyệt quế?
+            {morningWish(teachers)}
           </h1>
           <p className="mt-2 max-w-lg text-sm text-cream/85">
-            Lớp Lá 2 · Cô Nhi và Cô Trinh — dùng trên máy tính, không cần mạng.
+            {className} · {teachers || "Giáo viên"} — dùng trên máy tính, không cần mạng.
           </p>
         </div>
         <LaurelMark />
