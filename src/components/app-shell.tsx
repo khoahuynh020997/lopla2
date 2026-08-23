@@ -7,6 +7,7 @@ import {
   Trophy,
   Users,
   UsersRound,
+  Wallet,
   X,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -24,6 +25,7 @@ const NAV: { id: ViewId; label: string; icon: typeof Home }[] = [
   { id: "rewards", label: "Phần thưởng", icon: Gift },
   { id: "reports", label: "Báo cáo", icon: BarChart3 },
   { id: "badges", label: "Huy hiệu", icon: Award },
+  { id: "fees", label: "Các khoản thu", icon: Wallet },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

@@ -17,3 +17,7 @@ export function todayLabel(d = new Date()): string {
     year: "numeric",
   });
 }
+
+export function formatVnd(n: number): string {
+  return `${Math.round(n).toLocaleString("vi-VN")} đ`;
+}

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { BadgesView } from "@/components/badges-view";
 import { CompeteView } from "@/components/compete-view";
+import { FeesView } from "@/components/fees-view";
 import { GroupsView } from "@/components/groups-view";
 import { HomeView } from "@/components/home-view";
 import { ReportsView } from "@/components/reports-view";
@@ -41,6 +42,7 @@ export function App() {
       {view === "rewards" ? <RewardsView /> : null}
       {view === "reports" ? <ReportsView /> : null}
       {view === "badges" ? <BadgesView /> : null}
+      {view === "fees" ? <FeesView /> : null}
     </AppShell>
   );
 }

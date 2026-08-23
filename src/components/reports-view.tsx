@@ -53,6 +53,8 @@ export function ReportsView() {
         redemptions: data.redemptions,
         badges: data.badges,
         awarded: data.awarded,
+        feeCategories: data.feeCategories,
+        feePayments: data.feePayments,
       }, null, 2)],
       { type: "application/json" },
     );
@@ -79,6 +81,8 @@ export function ReportsView() {
           redemptions: (parsed.redemptions as never) ?? [],
           badges: (parsed.badges as never) ?? useAppStore.getState().badges,
           awarded: (parsed.awarded as never) ?? [],
+          feeCategories: (parsed.feeCategories as never) ?? useAppStore.getState().feeCategories,
+          feePayments: (parsed.feePayments as never) ?? [],
           musicOn: false,
           view: "reports",
         });

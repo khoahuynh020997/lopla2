@@ -6,6 +6,8 @@ export type ParsedRow = {
   gender: Gender;
   groupName: string;
   notes: string;
+  parentName: string;
+  parentPhone: string;
 };
 
 function norm(s: string): string {
@@ -51,6 +53,8 @@ export async function parseStudentFile(file: File): Promise<ParsedRow[]> {
       gender: parseGender(pick(row, ["giới tính", "gioi tinh", "gender", "phái"])),
       groupName: pick(row, ["tổ", "to", "nhóm", "nhom", "group", "to lop"]),
       notes: pick(row, ["ghi chú", "ghi chu", "notes", "note"]),
+      parentName: pick(row, ["phụ huynh", "phu huynh", "tên phụ huynh", "ten phu huynh", "bố mẹ", "bo me", "parent"]),
+      parentPhone: pick(row, ["sđt", "sdt", "điện thoại", "dien thoai", "phone", "số điện thoại", "so dien thoai", "liên hệ", "lien he"]),
     });
   }
   return out;
@@ -59,12 +63,12 @@ export async function parseStudentFile(file: File): Promise<ParsedRow[]> {
 export function downloadTemplate() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([
-    ["Họ tên", "Giới tính", "Tổ", "Ghi chú"],
-    ["Nguyễn Bảo An", "Nam", "Tổ Hoa", ""],
-    ["Lê Ngọc Hà", "Nữ", "Tổ Lá", ""],
-    ["Trần Minh Khang", "Nam", "Tổ Nắng", ""],
+    ["Họ tên", "Giới tính", "Tổ", "Phụ huynh", "SĐT", "Ghi chú"],
+    ["Nguyễn Bảo An", "Nam", "Tổ Hoa", "Nguyễn Văn A", "0901234567", ""],
+    ["Lê Ngọc Hà", "Nữ", "Tổ Lá", "Lê Thị B", "0912345678", ""],
+    ["Trần Minh Khang", "Nam", "Tổ Nắng", "Trần Văn C", "0987654321", ""],
   ]);
-  ws["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 14 }, { wch: 24 }];
+  ws["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 14 }, { wch: 24 }];
   XLSX.utils.book_append_sheet(wb, ws, "HocSinh");
   XLSX.writeFile(wb, "mau-danh-sach-lop-la-2.xlsx");
 }
@@ -77,7 +81,7 @@ export function exportScorebook(
 ) {
   const gmap = new Map(groups.map((g) => [g.id, g.name]));
   const rows = [
-    ["Họ tên", "Giới tính", "Tổ", "Điểm", "Ghi chú"],
+    ["Họ tên", "Giới tính", "Tổ", "Phụ huynh", "SĐT", "Điểm", "Ghi chú"],
     ...students
       .slice()
       .sort((a, b) => points(b.id) - points(a.id) || a.name.localeCompare(b.name, "vi"))
@@ -85,13 +89,15 @@ export function exportScorebook(
         s.name,
         s.gender === "nu" ? "Nữ" : s.gender === "nam" ? "Nam" : "",
         s.groupId ? (gmap.get(s.groupId) ?? "") : "",
+        s.parentName ?? "",
+        s.parentPhone ?? "",
         points(s.id),
         s.notes,
       ]),
   ];
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 24 }];
+  ws["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 14 }, { wch: 10 }, { wch: 24 }];
   XLSX.utils.book_append_sheet(wb, ws, "BangDiem");
   XLSX.writeFile(wb, `bang-diem-${className.replace(/\s+/g, "-")}.xlsx`);
 }

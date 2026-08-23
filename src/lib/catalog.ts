@@ -1,4 +1,5 @@
-import type { BadgeDef, Gender, Reward } from "./types";
+import type { BadgeDef, FeeCategory, Gender, Reward } from "./types";
+import { uid } from "./utils";
 
 export const POINT_REASONS: { label: string; delta: number }[] = [
   { label: "Ngồi ngoan", delta: 1 },
@@ -34,6 +35,22 @@ export const DEFAULT_BADGES: BadgeDef[] = [
   { id: "bd_an", name: "Bé ăn ngoan", desc: "Ăn hết suất, không kén", icon: "apple" },
   { id: "bd_le", name: "Bé lễ phép", desc: "Chào hỏi, biết ơn", icon: "flower" },
 ];
+
+export const DEFAULT_FEE_NAMES = [
+  "Tiền đồ dùng học tập",
+  "Tiền Bảo Hiểm",
+  "Khoản Thu Khác",
+  "Quỹ Lớp",
+] as const;
+
+export function defaultFeeCategories(classId: string): FeeCategory[] {
+  return DEFAULT_FEE_NAMES.map((name) => ({
+    id: uid("fee"),
+    classId,
+    name,
+    amount: 0,
+  }));
+}
 
 export const GROUP_COLORS = ["leaf", "gold", "coral", "sky"] as const;
 

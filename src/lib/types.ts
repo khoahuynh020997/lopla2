@@ -5,7 +5,8 @@ export type ViewId =
   | "compete"
   | "rewards"
   | "reports"
-  | "badges";
+  | "badges"
+  | "fees";
 
 export type Gender = "nam" | "nu" | "khac";
 
@@ -24,6 +25,8 @@ export type Student = {
   groupId: string | null;
   avatar: number;
   notes: string;
+  parentName: string;
+  parentPhone: string;
 };
 
 export type Group = {
@@ -73,6 +76,22 @@ export type StudentBadge = {
   at: number;
 };
 
+export type FeeCategory = {
+  id: string;
+  classId: string;
+  name: string;
+  amount: number;
+};
+
+export type FeePayment = {
+  id: string;
+  classId: string;
+  studentId: string;
+  categoryId: string;
+  amount: number;
+  at: number;
+};
+
 export type AppData = {
   classes: ClassRoom[];
   activeClassId: string;
@@ -83,6 +102,8 @@ export type AppData = {
   redemptions: Redemption[];
   badges: BadgeDef[];
   awarded: StudentBadge[];
+  feeCategories: FeeCategory[];
+  feePayments: FeePayment[];
   musicOn: boolean;
   view: ViewId;
 };

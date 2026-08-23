@@ -39,7 +39,7 @@ export function StudentsView() {
             <Upload className="size-4" />
             Mở Excel
           </Button>
-          <Button onClick={() => setEdit({ name: "", gender: "khac", groupId: groups[0]?.id ?? null, avatar: students.length % AVATAR_COUNT, notes: "" })}>
+          <Button onClick={() => setEdit({ name: "", gender: "khac", groupId: groups[0]?.id ?? null, avatar: students.length % AVATAR_COUNT, notes: "", parentName: "", parentPhone: "" })}>
             <Plus className="size-4" />
             Thêm bé
           </Button>
@@ -96,10 +96,16 @@ function StudentRow({
       <KidAvatar index={student.avatar} name={student.name} />
       <button className="min-w-0 flex-1 text-left" onClick={onEdit}>
         <p className="truncate font-bold">{student.name}</p>
-        <p className="text-xs text-forest/55">
+        <p className="truncate text-xs text-forest/55">
           {GENDER_LABEL[student.gender]}
           {groupName ? ` · ${groupName}` : ""}
+          {student.parentName ? ` · PH: ${student.parentName}` : ""}
         </p>
+        {student.parentPhone ? (
+          <a href={`tel:${student.parentPhone}`} className="text-xs font-bold text-leaf" onClick={(e) => e.stopPropagation()}>
+            {student.parentPhone}
+          </a>
+        ) : null}
       </button>
       <span className="font-display tabular-nums text-leaf">{pts}</span>
       <Button variant="ghost" size="icon" className="text-coral" onClick={onDelete} aria-label="Xóa">
@@ -124,11 +130,13 @@ function StudentForm({
   const [groupId, setGroupId] = useState<string | null>(value.groupId ?? null);
   const [avatar, setAvatar] = useState(value.avatar ?? 0);
   const [notes, setNotes] = useState(value.notes ?? "");
+  const [parentName, setParentName] = useState(value.parentName ?? "");
+  const [parentPhone, setParentPhone] = useState(value.parentPhone ?? "");
   const isEdit = Boolean(value.id);
 
   function save() {
     if (!name.trim()) return;
-    const payload = { name, gender, groupId, avatar, notes };
+    const payload = { name, gender, groupId, avatar, notes, parentName, parentPhone };
     if (value.id) updateStudent(value.id, payload);
     else addStudent(payload);
     onClose();
@@ -157,6 +165,10 @@ function StudentForm({
           <option key={g.id} value={g.id}>{g.name}</option>
         ))}
       </select>
+      <label className="mb-1 block text-xs font-bold">Tên phụ huynh</label>
+      <input className="mb-3 h-11 w-full rounded-xl bg-mist px-3" value={parentName} onChange={(e) => setParentName(e.target.value)} placeholder="Họ tên bố / mẹ" />
+      <label className="mb-1 block text-xs font-bold">Số điện thoại liên hệ</label>
+      <input className="mb-3 h-11 w-full rounded-xl bg-mist px-3" type="tel" inputMode="tel" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)} placeholder="090..." />
       <label className="mb-1 block text-xs font-bold">Ảnh đại diện</label>
       <div className="mb-3 flex flex-wrap gap-2">
         {Array.from({ length: AVATAR_COUNT }, (_, i) => (
@@ -223,6 +235,8 @@ function ImportModal({
       groupId: r.groupName ? g2.get(r.groupName.trim().toLowerCase()) ?? null : null,
       avatar: i % AVATAR_COUNT,
       notes: r.notes,
+      parentName: r.parentName,
+      parentPhone: r.parentPhone,
     }));
     const n = importStudents(final);
     setAdded(n);
@@ -232,7 +246,7 @@ function ImportModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Nhập học sinh từ Excel" wide>
       <p className="mb-3 text-sm text-forest/70">
-        Chọn file Excel trên máy. Cột bắt buộc: <b>Họ tên</b>. Thêm được Giới tính, Tổ, Ghi chú. Tên trùng sẽ bỏ qua.
+        Chọn file Excel trên máy. Cột bắt buộc: <b>Họ tên</b>. Thêm được Giới tính, Tổ, Phụ huynh, SĐT, Ghi chú. Tên trùng sẽ bỏ qua.
       </p>
       <div className="mb-3 flex flex-wrap gap-2">
         <Button variant="outline" onClick={() => downloadTemplate()}>
@@ -257,7 +271,7 @@ function ImportModal({
           <p className="mb-2 text-xs font-bold">{rows.length} dòng sẽ nhập</p>
           <div className="mb-3 max-h-48 overflow-auto rounded-xl bg-mist p-2 text-sm">
             {rows.slice(0, 40).map((r, i) => (
-              <p key={i}>{r.name}{r.groupName ? ` · ${r.groupName}` : ""}</p>
+              <p key={i}>{r.name}{r.parentName ? ` · ${r.parentName}` : ""}{r.groupName ? ` · ${r.groupName}` : ""}</p>
             ))}
             {rows.length > 40 ? <p>…</p> : null}
           </div>

@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { DEFAULT_BADGES, DEFAULT_REWARDS } from "./catalog";
+import { DEFAULT_BADGES, DEFAULT_REWARDS, defaultFeeCategories } from "./catalog";
 import type {
   AppData,
   ClassRoom,
+  FeeCategory,
+  FeePayment,
   Gender,
   Group,
   Student,
@@ -46,6 +48,8 @@ function seed(): AppData {
     groupId: groups[n.g]!.id,
     avatar: n.av,
     notes: "",
+    parentName: "",
+    parentPhone: "",
   }));
   const now = Date.now();
   return {
@@ -70,6 +74,8 @@ function seed(): AppData {
     redemptions: [],
     badges: DEFAULT_BADGES,
     awarded: [],
+    feeCategories: defaultFeeCategories(classId),
+    feePayments: [],
     musicOn: false,
     view: "home",
   };
@@ -98,6 +104,11 @@ type Actions = {
   deleteReward: (id: string) => void;
   awardBadge: (studentId: string, badgeId: string) => void;
   revokeBadge: (id: string) => void;
+  addFeeCategory: (name: string, amount: number) => void;
+  updateFeeCategory: (id: string, patch: Partial<Pick<FeeCategory, "name" | "amount">>) => void;
+  deleteFeeCategory: (id: string) => void;
+  setFeePaid: (studentId: string, categoryId: string, paid: boolean) => void;
+  setFeeAmount: (studentId: string, categoryId: string, amount: number) => void;
   replaceAll: (data: AppData) => void;
 };
 
@@ -117,7 +128,11 @@ export const useAppStore = create<AppData & Actions>()(
           teachers: teachers.trim() || "Cô Nhi và Cô Trinh",
           year: YEAR,
         };
-        set({ classes: [...get().classes, room], activeClassId: room.id });
+        set({
+          classes: [...get().classes, room],
+          activeClassId: room.id,
+          feeCategories: [...get().feeCategories, ...defaultFeeCategories(room.id)],
+        });
       },
       renameClass: (id, name, teachers) =>
         set({
@@ -137,6 +152,8 @@ export const useAppStore = create<AppData & Actions>()(
           events: get().events.filter((e) => e.classId !== id),
           redemptions: get().redemptions.filter((r) => r.classId !== id),
           awarded: get().awarded.filter((a) => a.classId !== id),
+          feeCategories: get().feeCategories.filter((f) => f.classId !== id),
+          feePayments: get().feePayments.filter((p) => p.classId !== id),
         });
       },
       addGroup: (name) => {
@@ -171,7 +188,14 @@ export const useAppStore = create<AppData & Actions>()(
         set({
           students: [
             ...get().students,
-            { ...s, id: uid("st"), classId, name: s.name.trim() },
+            {
+              ...s,
+              id: uid("st"),
+              classId,
+              name: s.name.trim(),
+              parentName: s.parentName?.trim() ?? "",
+              parentPhone: s.parentPhone?.trim() ?? "",
+            },
           ],
         });
       },
@@ -185,6 +209,7 @@ export const useAppStore = create<AppData & Actions>()(
           events: get().events.filter((e) => e.studentId !== id),
           redemptions: get().redemptions.filter((r) => r.studentId !== id),
           awarded: get().awarded.filter((a) => a.studentId !== id),
+          feePayments: get().feePayments.filter((p) => p.studentId !== id),
         }),
       importStudents: (rows) => {
         const classId = get().activeClassId;
@@ -199,7 +224,14 @@ export const useAppStore = create<AppData & Actions>()(
           if (!name) continue;
           if (existing.has(name.toLowerCase())) continue;
           existing.add(name.toLowerCase());
-          fresh.push({ ...row, id: uid("st"), classId, name });
+          fresh.push({
+            ...row,
+            id: uid("st"),
+            classId,
+            name,
+            parentName: row.parentName?.trim() ?? "",
+            parentPhone: row.parentPhone?.trim() ?? "",
+          });
         }
         if (fresh.length) set({ students: [...get().students, ...fresh] });
         return fresh.length;
@@ -276,11 +308,106 @@ export const useAppStore = create<AppData & Actions>()(
       },
       revokeBadge: (id) =>
         set({ awarded: get().awarded.filter((a) => a.id !== id) }),
+      addFeeCategory: (name, amount) => {
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        set({
+          feeCategories: [
+            ...get().feeCategories,
+            {
+              id: uid("fee"),
+              classId: get().activeClassId,
+              name: trimmed,
+              amount: Math.max(0, amount),
+            },
+          ],
+        });
+      },
+      updateFeeCategory: (id, patch) =>
+        set({
+          feeCategories: get().feeCategories.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  name: patch.name != null ? patch.name.trim() || f.name : f.name,
+                  amount: patch.amount != null ? Math.max(0, patch.amount) : f.amount,
+                }
+              : f,
+          ),
+        }),
+      deleteFeeCategory: (id) =>
+        set({
+          feeCategories: get().feeCategories.filter((f) => f.id !== id),
+          feePayments: get().feePayments.filter((p) => p.categoryId !== id),
+        }),
+      setFeePaid: (studentId, categoryId, paid) => {
+        const classId = get().activeClassId;
+        const cat = get().feeCategories.find((f) => f.id === categoryId);
+        const rest = get().feePayments.filter(
+          (p) => !(p.studentId === studentId && p.categoryId === categoryId),
+        );
+        if (!paid) {
+          set({ feePayments: rest });
+          return;
+        }
+        set({
+          feePayments: [
+            ...rest,
+            {
+              id: uid("pay"),
+              classId,
+              studentId,
+              categoryId,
+              amount: cat?.amount ?? 0,
+              at: Date.now(),
+            },
+          ],
+        });
+      },
+      setFeeAmount: (studentId, categoryId, amount) => {
+        const classId = get().activeClassId;
+        const rest = get().feePayments.filter(
+          (p) => !(p.studentId === studentId && p.categoryId === categoryId),
+        );
+        const n = Math.max(0, amount);
+        if (!n) {
+          set({ feePayments: rest });
+          return;
+        }
+        set({
+          feePayments: [
+            ...rest,
+            { id: uid("pay"), classId, studentId, categoryId, amount: n, at: Date.now() },
+          ],
+        });
+      },
       replaceAll: (data) => set({ ...data, hydrated: true }),
     }),
     {
       name: "lop-la-2-v1",
       skipHydration: true,
+      version: 2,
+      migrate: (persisted) => {
+        const p = persisted as Partial<AppData>;
+        const classes = p.classes ?? [];
+        const students = (p.students ?? []).map((s) => ({
+          ...s,
+          parentName: s.parentName ?? "",
+          parentPhone: s.parentPhone ?? "",
+        }));
+        let feeCategories = p.feeCategories ?? [];
+        for (const c of classes) {
+          if (!feeCategories.some((f) => f.classId === c.id)) {
+            feeCategories = [...feeCategories, ...defaultFeeCategories(c.id)];
+          }
+        }
+        return {
+          ...p,
+          students,
+          feeCategories,
+          feePayments: p.feePayments ?? [],
+        } as AppData;
+      },
       partialize: (s) => ({
         classes: s.classes,
         activeClassId: s.activeClassId,
@@ -291,6 +418,8 @@ export const useAppStore = create<AppData & Actions>()(
         redemptions: s.redemptions,
         badges: s.badges,
         awarded: s.awarded,
+        feeCategories: s.feeCategories,
+        feePayments: s.feePayments,
         musicOn: false,
         view: s.view,
       }),
@@ -358,4 +487,22 @@ export function useClassAwarded() {
   const id = useAppStore((s) => s.activeClassId);
   const awarded = useAppStore((s) => s.awarded);
   return useMemo(() => awarded.filter((a) => a.classId === id), [awarded, id]);
+}
+
+export function useClassFees() {
+  const id = useAppStore((s) => s.activeClassId);
+  const feeCategories = useAppStore((s) => s.feeCategories);
+  return useMemo(() => feeCategories.filter((f) => f.classId === id), [feeCategories, id]);
+}
+
+export function useClassFeePayments() {
+  const id = useAppStore((s) => s.activeClassId);
+  const feePayments = useAppStore((s) => s.feePayments);
+  return useMemo(() => feePayments.filter((p) => p.classId === id), [feePayments, id]);
+}
+
+export function paidFor(payments: FeePayment[], studentId: string, categoryId: string): number {
+  return payments
+    .filter((p) => p.studentId === studentId && p.categoryId === categoryId)
+    .reduce((n, p) => n + p.amount, 0);
 }
