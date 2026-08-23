@@ -21,3 +21,8 @@ export function todayLabel(d = new Date()): string {
 export function formatVnd(n: number): string {
   return `${Math.round(n).toLocaleString("vi-VN")} đ`;
 }
+
+export function morningWish(teachers: string): string {
+  const t = teachers.trim() || "cô";
+  return `Chúc ${t} Một Ngày Dạy Học Tràn Đầy Niềm Vui!`;
+}

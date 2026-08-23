@@ -24,6 +24,7 @@ export type Student = {
   gender: Gender;
   groupId: string | null;
   avatar: number;
+  photoUrl: string;
   notes: string;
   parentName: string;
   parentPhone: string;
