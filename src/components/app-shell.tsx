@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-dvh bg-cream">
       <aside className="hidden w-56 shrink-0 flex-col bg-leaf-deep text-cream lg:flex">
         <div className="px-4 pt-6 pb-4">
-          <p className="font-display text-2xl leading-none">Lớp Lá 2</p>
+          <p className="font-display text-2xl leading-none">{room?.name ?? "Lớp"}</p>
           <p className="mt-1 text-xs text-gold">{room?.teachers}</p>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -97,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button className="absolute inset-0 bg-forest/40" onClick={() => setOpen(false)} aria-label="Đóng" />
           <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-leaf-deep text-cream">
             <div className="flex items-center justify-between px-4 py-4">
-              <p className="font-display text-2xl">Lớp Lá 2</p>
+              <p className="font-display text-2xl">{room?.name ?? "Lớp"}</p>
               <Button variant="ghost" size="icon" className="text-cream" onClick={() => setOpen(false)}>
                 <X />
               </Button>
