@@ -47,6 +47,7 @@ function seed(): AppData {
     gender: n.gender,
     groupId: groups[n.g]!.id,
     avatar: n.av,
+    photoUrl: "",
     notes: "",
     parentName: "",
     parentPhone: "",
@@ -195,6 +196,7 @@ export const useAppStore = create<AppData & Actions>()(
               name: s.name.trim(),
               parentName: s.parentName?.trim() ?? "",
               parentPhone: s.parentPhone?.trim() ?? "",
+              photoUrl: s.photoUrl ?? "",
             },
           ],
         });
@@ -231,6 +233,7 @@ export const useAppStore = create<AppData & Actions>()(
             name,
             parentName: row.parentName?.trim() ?? "",
             parentPhone: row.parentPhone?.trim() ?? "",
+            photoUrl: row.photoUrl ?? "",
           });
         }
         if (fresh.length) set({ students: [...get().students, ...fresh] });
@@ -386,7 +389,7 @@ export const useAppStore = create<AppData & Actions>()(
     {
       name: "lop-la-2-v1",
       skipHydration: true,
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const p = persisted as Partial<AppData>;
         const classes = p.classes ?? [];
@@ -394,6 +397,7 @@ export const useAppStore = create<AppData & Actions>()(
           ...s,
           parentName: s.parentName ?? "",
           parentPhone: s.parentPhone ?? "",
+          photoUrl: s.photoUrl ?? "",
         }));
         let feeCategories = p.feeCategories ?? [];
         for (const c of classes) {
