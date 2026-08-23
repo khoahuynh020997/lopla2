@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap");
 @import "tailwindcss";
+@source "./**/*.{ts,tsx}";
+@source "../spa-entry/**/*.{ts,tsx}";
 
 @theme {
   --color-cream: #fff6e8;
@@ -13,7 +15,7 @@
   --color-sky: #5e9e8a;
   --color-white: #ffffff;
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Baloo 2", "Nunito", ui-sans-serif, sans-serif;
+  --font-display: "Baloo 2", "Nunito", ui-sans-serif, system-ui, sans-serif;
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
   --shadow-soft: 0 10px 24px -12px rgb(26 51 36 / 0.28);
