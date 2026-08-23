@@ -3,6 +3,7 @@ import { useState } from "react";
 import { KidAvatar } from "@/lib/avatars";
 import { POINT_REASONS } from "@/lib/catalog";
 import { studentBalance, useAppStore, useClassStudents } from "@/lib/store";
+import { LuckyWheel } from "./lucky-wheel";
 import { NamePickerButton } from "./name-picker";
 import { Button } from "./ui/button";
 import { Modal } from "./ui/modal";
@@ -18,16 +19,26 @@ export function CompeteView() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Thi đua</h1>
-          <p className="text-sm text-forest/60">Cộng hoặc trừ điểm từng bé, chọn lý do cho rõ.</p>
+          <p className="text-sm text-forest/60">Cộng hoặc trừ điểm từng bé, chọn lý do cho rõ. Xoay vòng may mắn để chọn một bé.</p>
         </div>
         <NamePickerButton />
       </div>
+
+      <LuckyWheel />
+
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {students
           .slice()
           .sort((a, b) => a.name.localeCompare(b.name, "vi"))
           .map((s) => (
-            <CompeteCard key={s.id} id={s.id} name={s.name} avatar={s.avatar} onOpen={() => setPick(s.id)} />
+            <CompeteCard
+              key={s.id}
+              id={s.id}
+              name={s.name}
+              avatar={s.avatar}
+              photoUrl={s.photoUrl}
+              onOpen={() => setPick(s.id)}
+            />
           ))}
       </div>
       {students.length === 0 ? (
@@ -61,11 +72,13 @@ function CompeteCard({
   id,
   name,
   avatar,
+  photoUrl,
   onOpen,
 }: {
   id: string;
   name: string;
   avatar: number;
+  photoUrl?: string;
   onOpen: () => void;
 }) {
   const pts = useAppStore((s) => studentBalance(s, id));
@@ -73,7 +86,7 @@ function CompeteCard({
   return (
     <article className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-soft">
       <button className="flex items-center gap-3 text-left" onClick={onOpen}>
-        <KidAvatar index={avatar} name={name} />
+        <KidAvatar index={avatar} name={name} photoUrl={photoUrl} />
         <div className="min-w-0">
           <p className="truncate font-bold">{name}</p>
           <p className="font-display text-xl tabular-nums text-leaf">{pts} điểm</p>
