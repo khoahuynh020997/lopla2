@@ -60,7 +60,7 @@ function NamePickerModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Gọi tên học sinh">
       <div className="flex flex-col items-center gap-4 py-2 text-center">
-        {kid ? <KidAvatar index={kid.avatar} name={kid.name} size="lg" /> : (
+        {kid ? <KidAvatar index={kid.avatar} name={kid.name} size="lg" photoUrl={kid.photoUrl} /> : (
           <div className="flex size-16 items-center justify-center rounded-full bg-mist font-display text-2xl text-leaf">?</div>
         )}
         <p className="font-display text-2xl">{label}</p>
