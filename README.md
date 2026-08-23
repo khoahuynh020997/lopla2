@@ -1,7 +1,11 @@
 # Lớp Lá 2 — Cô Nhi và Cô Trinh
 
-Ứng dụng quản lý học sinh mầm non: gọi tên, tích điểm, tổ, phần thưởng, huy hiệu, báo cáo. Dùng trên máy tính, lưu dữ liệu ngay trên trình duyệt (không cần mạng sau khi mở).
+Ứng dụng quản lý học sinh mầm non cho giáo viên: gọi tên, tích điểm, tổ, phần thưởng, huy hiệu, báo cáo, nhập Excel.
 
-**Mở app:** https://khoahuynh020997.github.io/lopla2/
+## Mở app trên máy tính
 
-Cô có thể nhập danh sách học sinh từ file Excel.
+https://khoahuynh020997.github.io/lopla2/
+
+Nếu link chưa mở được: vào repo → **Settings** → **Pages** → Source chọn **Deploy from a branch** → Branch **main** → Save.
+
+Dữ liệu lưu trên trình duyệt, dùng được khi mất mạng sau khi đã mở app.

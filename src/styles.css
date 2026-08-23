@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fff6e8;
+  --color-mist: #f3ead6;
+  --color-leaf: #2f8f4e;
+  --color-leaf-deep: #1c5c32;
+  --color-forest: #1a3324;
+  --color-gold: #e0b422;
+  --color-gold-deep: #c49212;
+  --color-coral: #e56b4e;
+  --color-sky: #5e9e8a;
+  --color-white: #ffffff;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Baloo 2", "Nunito", ui-sans-serif, sans-serif;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --shadow-soft: 0 10px 24px -12px rgb(26 51 36 / 0.28);
+  --shadow-border:
+    0 0 0 1px rgb(26 51 36 / 0.06),
+    0 1px 2px -1px rgb(26 51 36 / 0.06),
+    0 2px 8px 0 rgb(26 51 36 / 0.05);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-cream);
+    color: var(--color-forest);
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
